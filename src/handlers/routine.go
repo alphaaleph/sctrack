@@ -12,11 +12,7 @@ import (
 // StartYourEngines will set the web service
 func StartYourEngines() {
 
-	// get a handler to the database
-	//IRBOUT dbHandler = GetDBHandler(db)
-
 	// start a new server router
-	//IRBOUT router := newRouter(dbHandler)
 	router := newRouter()
 	//router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
