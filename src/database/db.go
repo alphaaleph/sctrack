@@ -15,7 +15,7 @@ var (
 	onceProd sync.Once
 )
 
-// DBInstance instantiates the database connection
+// DBInstance instantiates the database connection and sets a global connection to it.
 func DBInstance() *sql.DB {
 	onceProd.Do(func() {
 		// create singleton
@@ -30,11 +30,12 @@ func DBInstance() *sql.DB {
 	return db
 }
 
-// connect starts a new connection with the database
+// connect starts a new connection with the database represented by the passed sql instance. All database connection
+// information is read locally from the .env file, and from the environment variables in the cloud service.
 func connect() (*sql.DB, error) {
 
 	// create the database url connection
-	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=require",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
@@ -54,7 +55,7 @@ func connect() (*sql.DB, error) {
 	return db, nil
 }
 
-// Close closes the database connection
+// Close closes the database connection is a database instance is available.
 func Close() {
 	if sctrack.Db != nil {
 		sctrack.Log.Debug("Closing the database")

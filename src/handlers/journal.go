@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
-	"github.com/alphaaleph/sctrack"
-	"github.com/alphaaleph/sctrack/src/app"
+	"fmt"
+	"github.com/alphaaleph/sctrack/src/database"
 	"github.com/alphaaleph/sctrack/src/models"
 	"github.com/gorilla/mux"
-	"golang.org/x/exp/slog"
 	"net/http"
 )
 
@@ -15,36 +13,23 @@ import (
 // @Tags journal
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.JournalData
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Success 200 {array} models.Journal
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/journal/all [get]
-func GetJournal(w http.ResponseWriter, r *http.Request) {
+func GetJournals(w http.ResponseWriter, r *http.Request) {
 
-	query := `SELECT carrier.id, carrier.name, journal.uuid, journal.event
-				FROM carrier
-				INNER JOIN journal ON journal.carrier_id = carrier.id
-				ORDER BY carrier.id;`
+	// get the journals
+	var journals []models.Journal
+	var err error
 
-	rows, err := sctrack.Db.Query(query)
-	if err != nil {
-		sctrack.Log.Warn("Failed to get all journal entries", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNoContent, "Journal entries not found")
+	if journals, err = database.GetJournals(); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Journals not found: %s", err.Error()))
 		return
 	}
-	defer rows.Close()
 
-	// read all the journal entries
-	journal := []models.JournalData{}
-
-	for rows.Next() {
-		var j models.JournalData
-		rows.Scan(&j.CarrierID, &j.Carrier, &j.UUID, j.Event)
-		journal = append(journal, j)
-	}
-
-	response := json.NewEncoder(w).Encode(journal)
-	app.WriteJSONResponse(w, http.StatusOK, response)
+	// return the response
+	writeJSONResponse(w, http.StatusOK, journals)
 }
 
 // @Summary Get a journal
@@ -54,81 +39,70 @@ func GetJournal(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param uuid path string true "UUID"
 // @Success 200 {object} models.Journal
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/journal/{uuid} [get]
-func GetJournalEntry(w http.ResponseWriter, r *http.Request) {
+func GetJournalByUUID(w http.ResponseWriter, r *http.Request) {
 
 	uuid := mux.Vars(r)["uuid"]
 
-	query := `SELECT * FROM journal WHERE journal.uuid = $1;`
-	row := sctrack.Db.QueryRow(query, uuid)
+	// get the todos
+	journal := new(models.Journal)
+	var err error
 
-	var journal models.Journal
-	if err := row.Scan(&journal.UUID, &journal.Event, &journal.CarrierID); err != nil {
-		sctrack.Log.Error("GetJournalEntry fail", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNotFound, "Journal read failed")
+	if journal, err = database.GetJournalByUUID(uuid); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Journal not found: %s", err.Error()))
 		return
 	}
 
-	app.WriteJSONResponse(w, http.StatusOK, journal)
+	// return journal
+	writeJSONResponse(w, http.StatusOK, journal)
 }
 
 // @Summary Delete journal
-// @Description Delete an entry in the journal
+// @Description Delete an entry in the journal by UUID
 // @Tags journal
 // @Accept json
 // @Produce json
 // @Param uuid path string true "UUID"
 // @Success 200 ""
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/journal/{uuid} [delete]
 func DeleteJournalByUUID(w http.ResponseWriter, r *http.Request) {
 
 	uuid := mux.Vars(r)["uuid"]
 
-	stmt := `DELETE FROM journal WHERE journal.uuid = $1;`
-
-	_, err := sctrack.Db.Exec(stmt, uuid)
-	if err != nil {
-		sctrack.Log.Warn("Failed to delete a journal", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNoContent, "Journal delete failed")
+	if err := database.DeleteJournalByUUID(uuid); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Journal delete failed: %s", err.Error()))
 		return
 	}
 
-	app.WriteJSONResponse(w, http.StatusOK, "Success")
+	// return the response
+	writeJSONResponse(w, http.StatusOK, "Success")
 }
 
-// @Summary Add a journal
-// @Description Add a new journal entry
+// @Summary Delete journal
+// @Description Delete an entry in the journal by UUID and Index
 // @Tags journal
 // @Accept json
 // @Produce json
-// @Param data body models.Journal true "The Journal Inout"
+// @Param uuid path string true "UUID"
+// @Param index path int true "index"
 // @Success 200 ""
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
-// @Router /api/journal [post]
-func AddJournal(w http.ResponseWriter, r *http.Request) {
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
+// @Router /api/journal/{uuid}/{index} [delete]
+func DeleteJournalByUUIDIndex(w http.ResponseWriter, r *http.Request) {
 
-	var journal models.Journal
-	err := app.ExtractBodyJSON(r, &journal)
-	if err != nil {
-		sctrack.Log.Warn("Failed parse journal object", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNoContent, "Failed journal parse")
+	uuid := mux.Vars(r)["uuid"]
+	index := nUint(mux.Vars(r)["index"])
+
+	if err := database.DeleteJournalByUUIDIndex(index, uuid); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Journal delete failed: %s", err.Error()))
 		return
 	}
 
-	// add journal
-	stmt := `INSERT INTO journal (uuid, event, carrier_id) VALUES ($1, $2, $3);`
-	_, err = sctrack.Db.Exec(stmt, journal.UUID, journal.Event, journal.CarrierID)
-	if err != nil {
-		sctrack.Log.Warn("Failed to add journal", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusBadRequest, "Failed journal insert")
-		return
-	}
-
-	// return information
-	app.WriteJSONResponse(w, http.StatusOK, "Success")
+	// return the response
+	writeJSONResponse(w, http.StatusOK, "Success")
 }

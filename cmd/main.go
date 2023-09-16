@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/alphaaleph/sctrack"
+	_ "github.com/alphaaleph/sctrack/docs"
 	"github.com/alphaaleph/sctrack/src/database"
 	"github.com/alphaaleph/sctrack/src/handlers"
 	"os"

@@ -1,0 +1,484 @@
+definitions:
+  models.Carrier:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      telephone:
+        type: string
+    type: object
+  models.CarrierData:
+    properties:
+      carrier:
+        $ref: '#/definitions/models.Carrier'
+      journal:
+        items:
+          $ref: '#/definitions/models.Journal'
+        type: array
+      todos:
+        items:
+          $ref: '#/definitions/models.Todos'
+        type: array
+    type: object
+  models.DBError:
+    properties:
+      message:
+        type: string
+    type: object
+  models.Event:
+    properties:
+      action:
+        type: string
+      time:
+        type: string
+    type: object
+  models.Journal:
+    properties:
+      event:
+        $ref: '#/definitions/models.Event'
+      index:
+        type: integer
+      todo_uuid:
+        type: string
+      uuid:
+        type: string
+    type: object
+  models.Todos:
+    properties:
+      action:
+        type: string
+      carrierID:
+        type: string
+      completed:
+        type: boolean
+      created:
+        type: string
+      description:
+        type: string
+      uuid:
+        type: string
+    type: object
+  models.TodosAdd:
+    properties:
+      action:
+        type: string
+      carrierID:
+        type: string
+      description:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/action/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all action entries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get all actions
+      tags:
+      - actions
+  /api/carrier:
+    post:
+      consumes:
+      - application/json
+      description: Add a new carrier
+      parameters:
+      - description: The Carrier Inout
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.Carrier'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Add carrier
+      tags:
+      - carriers
+  /api/carrier/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a carrier
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Delete carrier
+      tags:
+      - carriers
+    get:
+      consumes:
+      - application/json
+      description: Get carrier's data details by ID
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CarrierData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get carrier's data
+      tags:
+      - carriers
+  /api/carrier/all:
+    get:
+      consumes:
+      - application/json
+      description: Get the information for all carriers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Carrier'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get all carriers
+      tags:
+      - carriers
+  /api/journal/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an entry in the journal by UUID
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Delete journal
+      tags:
+      - journal
+    get:
+      consumes:
+      - application/json
+      description: Get a journal entry that matches the uuid
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Journal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get a journal
+      tags:
+      - journal
+  /api/journal/{uuid}/{index}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an entry in the journal by UUID and Index
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: index
+        in: path
+        name: index
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Delete journal
+      tags:
+      - journal
+  /api/journal/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all entries from the journal
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Journal'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get journals
+      tags:
+      - journal
+  /api/todos:
+    post:
+      consumes:
+      - application/json
+      description: Add a todos entry for a carrier
+      parameters:
+      - description: New Todos
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.TodosAdd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Add todos
+      tags:
+      - todos
+  /api/todos/{uuid}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an entry in the todos list that match an uuid
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Delete todos by uuid
+      tags:
+      - todos
+    get:
+      consumes:
+      - application/json
+      description: Get all the entries in the todo list that match the uuid
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Todos'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get todo by carrier uuid
+      tags:
+      - todos
+  /api/todos/all:
+    get:
+      consumes:
+      - application/json
+      description: Get all the entries in the todo list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Todos'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get all todos
+      tags:
+      - todos
+  /api/todos/carrier/{carrier_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete entries in the todo list that match an carrier_id
+      parameters:
+      - description: carrier_id
+        in: path
+        name: carrier_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Delete todos by carrier_id
+      tags:
+      - todos
+    get:
+      consumes:
+      - application/json
+      description: Get all the entries in the todo list that match the carrier id
+      parameters:
+      - description: carrier_id
+        in: path
+        name: carrier_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Todos'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.DBError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.DBError'
+      summary: Get todos by carrier id
+      tags:
+      - todos
+swagger: "2.0"

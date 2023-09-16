@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/alphaaleph/sctrack"
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"golang.org/x/exp/slog"
 	"net/http"
 	"os"
@@ -14,7 +15,7 @@ func StartYourEngines() {
 
 	// start a new server router
 	router := newRouter()
-	//router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	port := os.Getenv("SERVER_PORT")
 	http.Handle("/", router)

@@ -1,7 +1,6 @@
 package models
 
-// Error is used for error responses
-type Error struct {
-	Code    int    `json:"code"`
+// DBError is used for error responses
+type DBError struct {
 	Message string `json:"message"`
 }

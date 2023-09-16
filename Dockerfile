@@ -22,6 +22,9 @@ WORKDIR /app
 # copy everthing from the builder
 COPY --from=builder /app/bin/cmd .
 
+# Copy the Swagger documentation files
+COPY docs/ ./docs/
+
 # expose the port and set the start
 EXPOSE 3030
 CMD ["./cmd"]

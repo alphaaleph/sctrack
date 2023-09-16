@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/alphaaleph/sctrack"
-	"github.com/alphaaleph/sctrack/src/app"
+	"github.com/alphaaleph/sctrack/src/database"
 	"github.com/alphaaleph/sctrack/src/models"
 	"github.com/gorilla/mux"
 	"golang.org/x/exp/slog"
@@ -15,36 +15,50 @@ import (
 // @Tags todos
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.TodosData
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Success 200 {array} models.Todos
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/todos/all [get]
 func GetTodos(w http.ResponseWriter, r *http.Request) {
 
-	query := `SELECT carrier.id, carrier.name, todos.uuid, todos.title, todos.completed
-				FROM carrier
-				INNER JOIN todos ON todos.carrier_id = carrier.id
-				ORDER BY carrier.id;`
+	// get the todos
+	var todos []models.Todos
+	var err error
 
-	rows, err := sctrack.Db.Query(query)
-	if err != nil {
-		sctrack.Log.Warn("Failed to get all todos", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNoContent, "Todos entries not found")
+	if todos, err = database.GetTodos(); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Todos not found: %s", err.Error()))
 		return
 	}
-	defer rows.Close()
 
-	// read all the todo entries
-	todos := []models.TodosData{}
+	// return the response
+	writeJSONResponse(w, http.StatusOK, todos)
+}
 
-	for rows.Next() {
-		var td models.TodosData
-		rows.Scan(&td.CarrierID, &td.Carrier, &td.UUID, &td.Title, &td.Completed)
-		todos = append(todos, td)
+// @Summary Get todos by carrier id
+// @Description Get all the entries in the todo list that match the carrier id
+// @Tags todos
+// @Accept json
+// @Produce json
+// @Param carrier_id path string true "carrier_id"
+// @Success 200 {array} models.Todos
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
+// @Router /api/todos/carrier/{carrier_id} [get]
+func GetTodosByCarrierID(w http.ResponseWriter, r *http.Request) {
+
+	carrierID := mux.Vars(r)["carrier_id"]
+
+	// get the todos
+	var todos []models.Todos
+	var err error
+
+	if todos, err = database.GetTodosByCarrierID(carrierID); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Todos not found: %s", err.Error()))
+		return
 	}
 
-	response := json.NewEncoder(w).Encode(todos)
-	app.WriteJSONResponse(w, http.StatusOK, response)
+	// return the response
+	writeJSONResponse(w, http.StatusOK, todos)
 }
 
 // @Summary Get todo by carrier uuid
@@ -53,82 +67,97 @@ func GetTodos(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param uuid path string true "UUID"
-// @Success 200 {array} models.Todos
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Success 200 {object} models.Todos
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/todos/{uuid} [get]
-func GetTodosEntry(w http.ResponseWriter, r *http.Request) {
+func GetTodoByUUID(w http.ResponseWriter, r *http.Request) {
 
 	uuid := mux.Vars(r)["uuid"]
 
-	query := `SELECT * FROM todos WHERE todos.uuid = $1;`
-	row := sctrack.Db.QueryRow(query, uuid)
+	// get the todos
+	var todos *models.Todos
+	var err error
 
-	var todos models.Todos
-	if err := row.Scan(&todos.UUID, &todos.Title, &todos.Completed, &todos.CarrierID); err != nil {
-		sctrack.Log.Error("GetTodosEntry fail", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNotFound, "Todos read failed")
+	if todos, err = database.GetTodoByUUID(uuid); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Todos not found: %s", err.Error()))
 		return
 	}
 
-	app.WriteJSONResponse(w, http.StatusOK, todos)
+	// return the response
+	writeJSONResponse(w, http.StatusOK, todos)
 }
 
-// @Summary Delete todo by id
-// @Description Delete an entry in the todo list that match an id
+// @Summary Delete todos by carrier_id
+// @Description Delete entries in the todo list that match an carrier_id
+// @Tags todos
+// @Accept json
+// @Produce json
+// @Param carrier_id path string true "carrier_id"
+// @Success 200 ""
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
+// @Router /api/todos/carrier/{carrier_id} [delete]
+func DeleteTodosByCarrierID(w http.ResponseWriter, r *http.Request) {
+
+	carrierID := mux.Vars(r)["carrier_id"]
+
+	if err := database.DeleteTodosByCarrierID(carrierID); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Todo delete failed: %s", err.Error()))
+	}
+
+	// return the response
+	writeJSONResponse(w, http.StatusOK, "Success")
+}
+
+// @Summary Delete todos by uuid
+// @Description Delete an entry in the todos list that match an uuid
 // @Tags todos
 // @Accept json
 // @Produce json
 // @Param uuid path string true "UUID"
 // @Success 200 ""
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/todos/{uuid} [delete]
 func DeleteTodoByUUID(w http.ResponseWriter, r *http.Request) {
 
 	uuid := mux.Vars(r)["uuid"]
 
-	stmt := `DELETE FROM todos WHERE uuid = $1;`
-
-	_, err := sctrack.Db.Exec(stmt, uuid)
-	if err != nil {
-		sctrack.Log.Warn("Failed to delete a todo", slog.String("uuid", uuid), slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNoContent, "Todo delete failed")
-		return
+	if err := database.DeleteTodosByUUID(uuid); err != nil {
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Todo delete failed: %s", err.Error()))
 	}
 
-	app.WriteJSONResponse(w, http.StatusOK, "Success")
+	// return the response
+	writeJSONResponse(w, http.StatusOK, "Success")
 }
 
-// @Summary Add todo
-// @Description Add a todo entry for a carrier
+// @Summary Add todos
+// @Description Add a todos entry for a carrier
 // @Tags todos
 // @Accept json
 // @Produce json
-// @Param data body models.Todos true "The Todos Inout"
+// @Param data body models.TodosAdd true "New Todos"
 // @Success 200 ""
-// @Failure 400 {object} models.Error
-// @Failure 404 {object} models.Error
+// @Failure 400 {object} models.DBError
+// @Failure 404 {object} models.DBError
 // @Router /api/todos [post]
-func AddTodos(w http.ResponseWriter, r *http.Request) {
+func AddTodo(w http.ResponseWriter, r *http.Request) {
 
-	var todos models.Todos
-	err := app.ExtractBodyJSON(r, &todos)
+	var td models.TodosAdd
+	err := extractBodyJSON(r, &td)
 	if err != nil {
-		sctrack.Log.Warn("Failed to delete a todo by id", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusNoContent, "Failed todos parse")
+		sctrack.Log.Warn("Failed parse todos add object", slog.String("Error", err.Error()))
+		writeErrorResponse(w, http.StatusNoContent, fmt.Sprintf("Failed todos add parse: %s", err.Error()))
 		return
 	}
 
 	// add todos
-	stmt := `INSERT INTO todos (uuid, title, completed, carrier_id) VALUES ($1, $2, $3, $4);`
-	_, err = sctrack.Db.Exec(stmt, todos.UUID, todos.Title, todos.Completed, todos.CarrierID)
-	if err != nil {
-		sctrack.Log.Warn("Failed to delete a todo by id", slog.String("Error", err.Error()))
-		app.WriteErrorResponse(w, http.StatusBadRequest, "Failed todos insert")
+	if err := database.AddTodo(td); err != nil {
+		writeErrorResponse(w, http.StatusBadRequest, fmt.Sprintf("Failed todos insert: %s", err.Error()))
 		return
 	}
 
-	// return information
-	app.WriteJSONResponse(w, http.StatusOK, "Success")
+	// return the response
+	writeJSONResponse(w, http.StatusOK, "Success")
 }
