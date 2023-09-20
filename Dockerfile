@@ -1,6 +1,5 @@
-FROM golang:1.20 as builder
-
-# working directory
+# build go server
+FROM golang:1.20 as builder-go
 WORKDIR /app
 
 # auto refresh uses .air.toml
@@ -20,10 +19,11 @@ FROM archlinux:latest
 WORKDIR /app
 
 # copy everthing from the builder
-COPY --from=builder /app/bin/cmd .
+#COPY --from=builder-react /app/build ./client
+COPY --from=builder-go /app/bin/cmd .
 
 # Copy the Swagger documentation files
-COPY docs/ ./docs/
+COPY --from=builder-go /app/docs/ ./docs/
 
 # expose the port and set the start
 EXPOSE 3030

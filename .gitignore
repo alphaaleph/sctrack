@@ -21,4 +21,6 @@
 go.work
 
 .idea/
+.env
 .env.local
+./temp

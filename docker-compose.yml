@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  web:
+
+  server:
     build: .
     container_name: sctrack
     image: sctrack-img
@@ -12,6 +13,17 @@ services:
     volumes:
       - .:/usr/src/app
     # command: air cmd/main.go -b 0.0.0.0
+
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/usr/src/app
+    depends_on:
+      - server
 
   # db:
   #  image: postgres:alpine

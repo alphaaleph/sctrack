@@ -9,7 +9,7 @@ swag init -g /src/handlers/carrier.go /src/handlers/journal.go /src/handlers/tod
 
 # build the docker images
 echo "Build the docker image ..."
-docker-compose build web
+docker-compose build server
 
 # completed
 echo "[Build Completed]"

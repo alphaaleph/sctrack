@@ -17,7 +17,7 @@ type Routes []Route
 // getRoutes return a list of all available REST calls
 func getRoutes() Routes {
 	return Routes{
-		Route{"GET", "/", getHomePage},
+		Route{"GET", "/test", getHomePage},
 
 		// carrier calls
 		Route{"DELETE", "/api/carrier/{id}", DeleteCarrierByID},
