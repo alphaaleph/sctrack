@@ -7,11 +7,18 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+const (
+	sqlGetCarriers        = "SELECT * FROM  carrier;"
+	sqlGetCarrierDataByID = "SELECT id, name, telephone FROM carrier WHERE id = '%s';"
+	sqlDeleteCarrierByID  = "DELETE FROM carrier WHERE id = '%s';"
+	sqlAddCarrier         = "INSERT INTO carrier (id, name, telephone) VALUES ('%s', '%s', '%s');"
+)
+
 // GetCarriers reads all the data from the carrier table
 func GetCarriers() ([]models.Carrier, error) {
 
-	query := `SELECT * FROM  carrier;`
-	rows, err := sctrack.Db.Query(query)
+	// TODO: remove query := `SELECT * FROM  carrier;`
+	rows, err := sctrack.Db.Query(sqlGetCarriers)
 	if err != nil {
 		sctrack.Log.Warn("Failed to get all carriers", slog.String("Error", err.Error()))
 		return nil, err
@@ -36,7 +43,8 @@ func GetCarriers() ([]models.Carrier, error) {
 func GetCarrierDataByID(carrierID string) (*models.CarrierData, error) {
 
 	// read carrier data
-	query := fmt.Sprintf("SELECT id, name, telephone FROM carrier WHERE carrier.id = '%s';", carrierID)
+	// TODO: remove  query := fmt.Sprintf("SELECT id, name, telephone FROM carrier WHERE carrier.id = '%s';", carrierID)
+	query := fmt.Sprintf(sqlGetCarrierDataByID, carrierID)
 	row := sctrack.Db.QueryRow(query)
 
 	var err error
@@ -76,7 +84,8 @@ func GetCarrierDataByID(carrierID string) (*models.CarrierData, error) {
 func DeleteCarrierByID(carrierID string) error {
 
 	// delete carrier and data
-	stmt := fmt.Sprintf("DELETE FROM carrier WHERE id = '%s';", carrierID)
+	// TODO: remove  stmt := fmt.Sprintf("DELETE FROM carrier WHERE id = '%s';", carrierID)
+	stmt := fmt.Sprintf(sqlDeleteCarrierByID, carrierID)
 
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
@@ -91,8 +100,7 @@ func DeleteCarrierByID(carrierID string) error {
 func AddCarrier(carrier models.Carrier) error {
 
 	// add the carrier
-	stmt := fmt.Sprintf("INSERT INTO carrier (id, name, telephone) VALUES ('%s', '%s', '%s');", carrier.ID,
-		carrier.Name, carrier.Telephone)
+	stmt := fmt.Sprintf(sqlAddCarrier, carrier.ID, carrier.Name, carrier.Telephone)
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
 		sctrack.Log.Warn("Failed to add carrier", slog.String("Error", err.Error()))

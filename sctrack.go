@@ -12,7 +12,7 @@ var Db *sql.DB
 
 // init used to get the program's logging started
 func init() {
-	// TODO: these options should be set with the configuration file
+	// TODO: these options should be set with a configuration file
 	opts := &slog.HandlerOptions{
 		//AddSource: true,
 		Level: slog.LevelDebug,

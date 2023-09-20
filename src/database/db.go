@@ -35,13 +35,7 @@ func DBInstance() *sql.DB {
 func connect() (*sql.DB, error) {
 
 	// create the database url connection
-	url := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=require",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_NAME"),
-	)
+	url := getDbUrl()
 	sctrack.Log.Debug("Connect string", slog.String("DB URL", url))
 
 	// open a connection to the database
@@ -55,10 +49,13 @@ func connect() (*sql.DB, error) {
 	return db, nil
 }
 
-// Close closes the database connection is a database instance is available.
-func Close() {
-	if sctrack.Db != nil {
-		sctrack.Log.Debug("Closing the database")
-		sctrack.Db.Close()
-	}
+// getDbUrl returns the database connection string
+func getDbUrl() string {
+	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=require",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
 }

@@ -6,11 +6,15 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+const (
+	sqlGetActions = "SELECT * FROM  action_enum_table;"
+)
+
 // GetActions reads all the data from the action_enum_table
 func GetActions() ([]models.ActionTable, error) {
 
-	query := `SELECT * FROM  action_enum_table;`
-	rows, err := sctrack.Db.Query(query)
+	// TODO: remove query := `SELECT * FROM  action_enum_table;`
+	rows, err := sctrack.Db.Query(sqlGetActions)
 	if err != nil {
 		sctrack.Log.Warn("Failed to get all actions", slog.String("Error", err.Error()))
 		return nil, err

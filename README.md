@@ -13,7 +13,7 @@ alpha.aleph@gmail.com, and I'll be happy to get it started for you.  :-)
 ## Docker Hub
 The application container will also be served in Docker Hub under:
 ```
-docker pull alphaaleph/sctrack:v1.4
+docker pull alphaaleph/sctrack:v1.3
 ```
 
 ## Database
@@ -22,18 +22,6 @@ The database provides four tables for the demo:
 * todos - holds the todos for each carrier
 * journal - used to keep track of the carrier's goings
 * action - list of actions associated with todos
-
-## Connect
-Current database connection:
-```
-DB_USER=sctrack_pg_user
-DB_PASSWORD=7jAZPc5kmiqafsK37zc5XA6LFx8XE9H3
-DB_NAME=sctrack_pg
-DB_HOST=dpg-ck19417dorps73c4k42g-a.oregon-postgres.render.com
-DB_PORT=5432
-DB_DRIVER=postgres
-SERVER_PORT=3030
-```
 
 ## Data
 There is a Python and SQL scripts under the data directory that initializes the database with dummy data. Update the 
@@ -63,3 +51,11 @@ Some of the packages used in the program
 
 ## Swagger
 ![plot](./assets/swagger_calls.png)
+
+
+## TODO
+* refactor code and clean
+* add update calls
+* add React front-end
+* create similar project using MongoDB
+* create similar project using ORM and SQlite

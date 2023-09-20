@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+const (
+	sqlGetJournals            = "SELECT uuid, index, event, todo_uuid FROM journal;"
+	sqlGetJournalByUUID       = "SELECT uuid, index, event, todo_uuid FROM journal WHERE uuid = '%s';"
+	sqlGetJournalsByCarrierID = "SELECT j.uuid AS journal_uuid, j.index AS journal_index, j.event AS journal_event, " +
+		"j.todo_uuid as journal_todo_uuid FROM journal j INNER JOIN todos t ON j.todo_uuid = t.uuid " +
+		"INNER JOIN carrier c ON t.carrier_id = c.id WHERE c.id = '%s';"
+	sqlDeleteJournalByUUID      = "DELETE FROM journal WHERE journal.uuid = '%s';"
+	sqlDeleteJournalByUUIDIndex = "DELETE FROM journal WHERE uuid = '%s' and index = '%d';"
+	sqlAddJournal               = "INSERT INTO journal (uuid, event, todo_uuid) VALUES ('%s', '%s', '%s');"
+)
+
 // getJournalList gets a slice of journals
 func getJournalList(query string) ([]models.Journal, error) {
 
@@ -33,14 +44,15 @@ func getJournalList(query string) ([]models.Journal, error) {
 
 // GetJournals reads all the data from the journals table
 func GetJournals() ([]models.Journal, error) {
-	query := "SELECT uuid, index, event, todo_uuid FROM journal;"
-	return getJournalList(query)
+	// TODO: remove query := "SELECT uuid, index, event, todo_uuid FROM journal;"
+	return getJournalList(sqlGetActions)
 }
 
 // GetJournalByUUID returns the journal associated with the uuid
 func GetJournalByUUID(uuid string) (*models.Journal, error) {
 
-	query := fmt.Sprintf("SELECT uuid, index, event, todo_uuid FROM journal WHERE uuid = '%s';", uuid)
+	// TODO: remove query := fmt.Sprintf("SELECT uuid, index, event, todo_uuid FROM journal WHERE uuid = '%s';", uuid)
+	query := fmt.Sprintf(sqlGetJournalByUUID, uuid)
 	row := sctrack.Db.QueryRow(query)
 
 	var journal models.Journal
@@ -56,16 +68,18 @@ func GetJournalByUUID(uuid string) (*models.Journal, error) {
 // GetJournalsByCarrierID returns the journals associated with a carrier id
 func GetJournalsByCarrierID(carrierID string) ([]models.Journal, error) {
 
-	query := fmt.Sprintf("SELECT j.uuid AS journal_uuid, j.index AS journal_index, j.event AS journal_event, "+
-		"j.todo_uuid as journal_todo_uuid FROM journal j INNER JOIN todos t ON j.todo_uuid = t.uuid "+
-		"INNER JOIN carrier c ON t.carrier_id = c.id WHERE c.id = '%s';", carrierID)
+	/* TODO: reomvequery := fmt.Sprintf("SELECT j.uuid AS journal_uuid, j.index AS journal_index, j.event AS journal_event, "+
+	"j.todo_uuid as journal_todo_uuid FROM journal j INNER JOIN todos t ON j.todo_uuid = t.uuid "+
+	"INNER JOIN carrier c ON t.carrier_id = c.id WHERE c.id = '%s';", carrierID) */
+	query := fmt.Sprintf(sqlGetJournalsByCarrierID, carrierID)
 	return getJournalList(query)
 }
 
 // DeleteJournalByUUID deletes all journal entries based on uuid
 func DeleteJournalByUUID(uuid string) error {
 
-	stmt := fmt.Sprintf("DELETE FROM journal WHERE journal.uuid = '%s';", uuid)
+	// TODO: remove stmt := fmt.Sprintf("DELETE FROM journal WHERE journal.uuid = '%s';", uuid)
+	stmt := fmt.Sprintf(sqlDeleteJournalByUUID, uuid)
 
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
@@ -78,7 +92,8 @@ func DeleteJournalByUUID(uuid string) error {
 // DeleteJournalByUUIDIndex deletes a journal entry based on uuid and index
 func DeleteJournalByUUIDIndex(index uint, uuid string) error {
 
-	stmt := fmt.Sprintf("DELETE FROM journal WHERE uuid = '%s' and index = '%d';", uuid, index)
+	// TODO: remove stmt := fmt.Sprintf("DELETE FROM journal WHERE uuid = '%s' and index = '%d';", uuid, index)
+	stmt := fmt.Sprintf(sqlDeleteJournalByUUIDIndex, uuid, index)
 
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
@@ -93,8 +108,7 @@ func DeleteJournalByUUIDIndex(index uint, uuid string) error {
 func AddJournal(journal models.Journal) error {
 
 	// add the journal
-	stmt := fmt.Sprintf("INSERT INTO journal (uuid, event, todo_uuid) "+
-		"VALUES ('%s', '%s', '%s');", journal.UUID, journal.Event, journal.TodoUUID)
+	stmt := fmt.Sprintf(sqlAddJournal, journal.UUID, journal.Event, journal.TodoUUID)
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
 		sctrack.Log.Warn("Failed to add journal", slog.String("Error", err.Error()))

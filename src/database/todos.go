@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+const (
+	sqlGetTodos            = "SELECT uuid, created, description, completed, carrier_id, action FROM todos;"
+	sqlGetTodosByCarrierID = "SELECT uuid, created, description, completed, carrier_id, action " +
+		"FROM todos WHERE carrier_id = '%s';"
+	sqlGetTodoByUUID          = "SELECT uuid, created, description, completed, carrier_id, action FROM todos WHERE uuid = '%s';"
+	sqlDeleteTodosByCarrierID = "DELETE FROM todos WHERE carrier_id = '%s';"
+	sqlDeleteTodosByUUID      = "DELETE FROM todos WHERE uuid = '%s';"
+	sqlAddTodo                = "INSERT INTO todos (uuid, created, description, completed, carrier_id, action) " +
+		"VALUES ('%s', '%s', '%s', '%v', '%s', '%s');"
+)
+
 // get a slice of todos
 func getTodosList(query string) ([]models.Todos, error) {
 
@@ -34,23 +45,25 @@ func getTodosList(query string) ([]models.Todos, error) {
 
 // GetTodos reads all the data from the todos table
 func GetTodos() ([]models.Todos, error) {
-	query := "SELECT uuid, created, description, completed, carrier_id, action FROM todos;"
-	return getTodosList(query)
+	// TODO: remove query := "SELECT uuid, created, description, completed, carrier_id, action FROM todos;"
+	return getTodosList(sqlGetTodos)
 }
 
 // GetTodosByCarrierID returns all the todos associated with a carrier
 func GetTodosByCarrierID(carrierID string) ([]models.Todos, error) {
 
-	query := fmt.Sprintf("SELECT uuid, created, description, completed, carrier_id, action FROM todos "+
-		"WHERE carrier_id = '%s';", carrierID)
+	/* TODO: remove query := fmt.Sprintf("SELECT uuid, created, description, completed, carrier_id, action FROM todos "+
+	"WHERE carrier_id = '%s';", carrierID)*/
+	query := fmt.Sprintf(sqlGetTodosByCarrierID, carrierID)
 	return getTodosList(query)
 }
 
 // GetTodoByUUID returns the todos associated with the uuid
 func GetTodoByUUID(uuid string) (*models.Todos, error) {
 
-	query := fmt.Sprintf("SELECT uuid, created, description, completed, carrier_id, action FROM todos "+
-		"WHERE uuid = '%s';", uuid)
+	/* TODO: remove query := fmt.Sprintf("SELECT uuid, created, description, completed, carrier_id, action FROM todos "+
+	"WHERE uuid = '%s';", uuid)*/
+	query := fmt.Sprintf(sqlGetTodoByUUID, uuid)
 	row := sctrack.Db.QueryRow(query)
 
 	var todos models.Todos
@@ -67,7 +80,8 @@ func GetTodoByUUID(uuid string) (*models.Todos, error) {
 // DeleteTodosByCarrierID deletes the todos associated with a carrier
 func DeleteTodosByCarrierID(carrierID string) error {
 
-	stmt := fmt.Sprintf("DELETE FROM todos WHERE carrier_id = '%s';", carrierID)
+	//stmt := fmt.Sprintf("DELETE FROM todos WHERE carrier_id = '%s';", carrierID)
+	stmt := fmt.Sprintf(sqlDeleteTodosByCarrierID, carrierID)
 
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
@@ -81,7 +95,8 @@ func DeleteTodosByCarrierID(carrierID string) error {
 // DeleteTodosByUUID deletes a todos matching the uuid
 func DeleteTodosByUUID(uuid string) error {
 
-	stmt := fmt.Sprintf("DELETE FROM todos WHERE uuid = '%s';", uuid)
+	//stmt := fmt.Sprintf("DELETE FROM todos WHERE uuid = '%s';", uuid)
+	stmt := fmt.Sprintf(sqlDeleteTodosByUUID, uuid)
 
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
@@ -107,8 +122,7 @@ func AddTodo(td models.TodosAdd) error {
 	created := time.Now().Format("2006-01-02 15:04:05.000")
 
 	// add the todos
-	stmt := fmt.Sprintf("INSERT INTO todos (uuid, created, description, completed, carrier_id, action) "+
-		"VALUES ('%s', '%s', '%s', '%v', '%s', '%s');", uuid, created, td.Description, false, td.CarrierID, td.Action)
+	stmt := fmt.Sprintf(sqlAddTodo, uuid, created, td.Description, false, td.CarrierID, td.Action)
 	_, err := sctrack.Db.Exec(stmt)
 	if err != nil {
 		sctrack.Log.Warn("Failed to add todos", slog.String("Error", err.Error()))
