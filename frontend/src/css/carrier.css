@@ -1,0 +1,51 @@
+/* Add this CSS to style your CarriersForm component */
+
+/* Center the content vertically and horizontally */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Adjust the height to your preference */
+}
+
+/* Style the table */
+table {
+    border-collapse: collapse;
+    width: 80%; /* Adjust the width to your preference */
+    margin: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+/* Center-align table headers */
+th {
+    text-align: center;
+}
+
+/* Style the table header row */
+thead {
+    background-color: #f2f2f2;
+}
+
+/* Style alternating rows for better readability */
+tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Style table hover effect */
+tbody tr:hover {
+    background-color: #ddd;
+}
+
+/* Center the table on the page */
+table {
+    margin: 0 auto;
+}

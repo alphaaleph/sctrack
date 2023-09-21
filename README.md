@@ -10,10 +10,23 @@ alpha.aleph@gmail.com, and I'll be happy to get it started for you.  :-)
 
 * Swagger link : https://sctrack.onrender.com/swagger/index.html#/
 
+![plot](./assets/swagger_calls.png)
+
+## React/Typescript
+I'm learning React and Typescript to be more well-rounded.  :-)  So I did enough to show the list of
+carriers in a table.  Of course the code can be improved, as I learn more, and I can add more pages. But
+for now this is good. Gives me an idea of how the frontend interacts with the backend.
+
+I cannot host this application in Render, as I only have the free tier.  But I'm including a pic of the one
+page that I created to list all the carriers.
+
+![plot](./assets/react_carrier_list.png)
+
 ## Docker Hub
-The application container will also be served in Docker Hub under:
+The application container and client can also be found in Docker Hub under:
 ```
-docker pull alphaaleph/sctrack:v1.3
+server:  docker pull alphaaleph/sctrack:v0.1.2
+client:  docker pull alphaaleph/sctrack-c:v0.1.2
 ```
 
 ## Database
@@ -49,13 +62,11 @@ Some of the packages used in the program
 * [slog](golang.org/x/exp/slog) - Go's structured logging
 * [swaggo](https://github.com/swaggo/swag) - swagger documentation
 
-## Swagger
-![plot](./assets/swagger_calls.png)
-
 
 ## TODO
-* refactor code and clean
-* add update calls
-* add React front-end
-* create similar project using MongoDB
-* create similar project using ORM and SQlite
+- [ ] refactor code and clean
+- [ ] add update calls 
+- [ ] add more react front-end 
+- [ ] create similar project using MongoDB
+- [ ] create similar project using ORM and SQlite
+- [ ] add api call to Patch the todos completed flag

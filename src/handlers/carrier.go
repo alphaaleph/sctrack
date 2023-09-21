@@ -22,6 +22,11 @@ import (
 // @Router /api/carrier/all [get]
 func GetCarriers(w http.ResponseWriter, r *http.Request) {
 
+	// set headers
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 	// get the carriers
 	var carriers []models.Carrier
 	var err error
