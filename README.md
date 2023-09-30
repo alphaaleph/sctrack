@@ -10,7 +10,7 @@ alpha.aleph@gmail.com, and I'll be happy to get it started for you.  :-)
 
 * Swagger link : https://sctrack.onrender.com/swagger/index.html#/
 
-![plot](./assets/swagger_calls.png)
+![plot](server/assets/swagger_calls.png)
 
 ## React/Typescript
 I'm learning React and Typescript to be more well-rounded.  :-)  So I did enough to show the list of
@@ -20,13 +20,13 @@ for now this is good. Gives me an idea of how the frontend interacts with the ba
 I cannot host this application in Render, as I only have the free tier.  But I'm including a pic of the one
 page that I created to list all the carriers.
 
-![plot](./assets/react_carrier_list.png)
+![plot](server/assets/react_carrier_list.png)
 
 ## Docker Hub
 The application container and client can also be found in Docker Hub under:
 ```
-server:  docker pull alphaaleph/sctrack:v0.1.2
-client:  docker pull alphaaleph/sctrack-c:v0.1.2
+server:  docker pull alphaaleph/sctrack:v0.1.3
+client:  docker pull alphaaleph/sctrack-c:v0.1.3
 ```
 
 ## Database

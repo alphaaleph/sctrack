@@ -1,15 +1,11 @@
 #!/bin/bash
 
-# build the application
-echo "Build the ScTrack application ..."
-go build -o ./bin ./...
-
 # Generate swagger
-swag init -g /src/handlers/carrier.go /src/handlers/journal.go /src/handlers/todos.go
+swag init --generatedTime --output ./server/docs --dir ./server/cmd/,./server/src/handlers/,./server/src/models
 
 # build the docker images
 echo "Build the docker image ..."
-docker-compose build server
+docker-compose build
 
 # completed
 echo "[Build Completed]"

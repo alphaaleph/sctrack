@@ -2,43 +2,59 @@ version: '3.8'
 
 services:
 
+  post-db:
+    image: postgres
+    restart: always
+    ports:
+      #- 5432:5432
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pw
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    networks:
+      - application
+
   server:
-    build: .
-    container_name: sctrack
     image: sctrack-img
-    env_file:
-      - .env
+    container_name: sctrack
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      #target: prod
     ports:
       - 3030:3030
+    env_file:
+      - server/.env
     volumes:
       - .:/usr/src/app
+    networks:
+      - application
+    depends_on:
+      - post-db
     # command: air cmd/main.go -b 0.0.0.0
 
   client:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
     ports:
       - 3000:3000
-    volumes:
-      - ./frontend:/usr/src/app
     environment:
+      REACT_APP_API_HOST: localhost
       REACT_APP_API_SERVER_PORT: 3030
+    volumes:
+      - ./client:/usr/src/app
+    networks:
+      - application
     depends_on:
       - server
 
-  # db:
-  #  image: postgres:alpine
-  #  environment:
-  #    - POSTGRES_HOST=${DB_HOST}
-  #    - POSTGRES_USER=${DB_USER}
-  #    - POSTGRES_PASSWORD=${DB_PASSWORD}
-  #    - POSTGRES_DB=${DB_NAME}
-  #  ports:
-  #    - 5432:5432
-  #  volumes:
-  #    - postgres-db:/var/lib/postgresql/data
+volumes:
+  postgres-db:
 
-#volumes:
-#  postgres-db:
-
+networks:
+  application:
