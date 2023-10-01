@@ -52,11 +52,12 @@ func connect() (*sql.DB, error) {
 
 // getDbUrl returns the database connection string
 func getDbUrl() string {
-	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%s",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_NAME"),
+		os.Getenv("SSL_MODE"),
 	)
 }

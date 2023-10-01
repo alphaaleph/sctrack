@@ -10,9 +10,9 @@ import (
 
 // main entry point to the application
 //
-//	@title Sctrack
-//	@BasePath  /
-//	@schemes http
+//		@title sctrack
+//	 	@BasePath /
+//		@schemes https http
 func main() {
 	os.Exit(execute())
 }
